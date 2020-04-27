@@ -14,7 +14,50 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(sensitivity)
 library(pse)
+library(gridExtra)
 
+
+```
+
+```{r}
+# Sensitivity Analysis
+# All parameters varied
+
+
+
+
+```
+
+```{r}
+# Rank and Graph of Sensitivity Analysis
+
+
+```
+
+
+```{r}
+# Sensitivity Analysis using LHS
+
+
+```
+
+```{r}
+# Rank and Graph of LHS
+```
+
+
+```{r}
+# Sensitivity Analysis Using Sobel Method
+
+```
+
+```{r}
+# Rank and Graph of Sobel Method
+```
+
+
+```{r}
+# Sensitivity Analysis using twice as many parameters
 
 
 ```
