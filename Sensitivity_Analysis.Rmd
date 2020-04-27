@@ -45,9 +45,6 @@ q = c("qnorm", "qnorm", "qnorm", "qnorm", "qnorm")
 q.arg = list(list(mean=-0.015,sd=sd1), list(mean=-0.0046, sd=sd2), list(mean=-0.07, sd=sd3), list(mean=0.0043, sd=sd4), list(mean=0.28, sd=sd5))
 
 
-
-
-
 ```
 
 ```{r}
@@ -76,11 +73,13 @@ head(sens_pars)
 sens_results = matrix(nrow=nsets, ncol=5)
 
 # read in the input data
-SB=read_csv("climate.csv")
-clim= SB
+clim=read_csv("climate_input.csv")%>%
+  rename(min_temp = min_T.y)%>%
+  rename(precip = precip.x)
+
 
 #apply our function to the sensativity parameters 
-tmp= mapply(FUN=Almond_Yield,Tmincoeff1=sens_pars$Tmincoeff1, Tmincoeff2=sens_pars$Tmincoeff2, MoreArgs=list(clim=clim))
+tmp= mapply(FUN=Almond_Yield,min_temp_coeff=sens_pars$min_temp_coeff, min_temp_coeff2=sens_pars$min_temp_coeff2,precip_coeff=sens_pars$precip_coeff, precip_coeff2=sens_pars$precip_coeff2, intercept=sens_pars$intercept, min_temp = clim$min_temp, precip=clim$precip)
 head(tmp)
 
 # use unlist to get a matrix
