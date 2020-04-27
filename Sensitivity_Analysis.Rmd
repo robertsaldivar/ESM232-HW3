@@ -51,22 +51,14 @@ head(sens_pars)
 
 # now run the model for each pai of samples
 # first create a data structure to store results
-sens_results = matrix(nrow=nsets, ncol=2)
+sens_results = matrix(nrow=nsets, ncol=5)
 
 # read in the input data
-SB=read.table("../data/clim.txt")
+SB=read_csv("climate.csv")
 clim= SB
 
-
-# note our use of unlist here to extract the results we need
-# try this with > 500 parameter sets - will take time
-for (i in 1:nsets) {
-  sens_results[i,] = unlist(almond(clim=clim,Tmincoeff1=sens_pars[i,1], Tmincoeff2=sens_pars[i,2]))
-}
-
-# this will be much faster
-# notice that MoreArgs is used for inputs that are the same for each set
-tmp= mapply(FUN=almond, Tmincoeff1=sens_pars$Tmincoeff1, Tmincoeff2=sens_pars$Tmincoeff2, MoreArgs=list(clim=clim))
+#apply our function to the sensativity parameters 
+tmp= mapply(FUN=Almond_Yield,Tmincoeff1=sens_pars$Tmincoeff1, Tmincoeff2=sens_pars$Tmincoeff2, MoreArgs=list(clim=clim))
 head(tmp)
 
 # use unlist to get a matrix
