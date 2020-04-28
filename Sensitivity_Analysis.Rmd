@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-
+#Loading packages for sensitivity analysis
 library(tidyverse)
 library(sensitivity)
 library(pse)
@@ -113,6 +113,73 @@ ggplot(tmp, aes(yield, value, col=yield))+geom_boxplot()+labs(y="Yield (as anomo
 ```{r}
 # Sensitivity Analysis Using Sobel Method
 
+source("Almond_Yield.R")
+# names of parameters
+# number of paramets
+
+nsets = 500
+min_temp_coeff = rnorm(mean = -0.015, sd = 0.2, n = nsets)
+min_temp_coeff2 = rnorm(mean = -0.0046, sd = 0.2, n = nsets)
+precip_coeff = rnorm(mean = -0.07, sd = 0.2, n = nsets)
+precip_coeff2 = rnorm(mean = 0.0043, sd = 0.2, n = nsets)
+intercept = rnorm(mean = 0.28, sd = 0.2, n = nsets)
+min_temp = rep_len(clim$min_temp, length.out = nsets)
+precip = rep_len(clim$precip, length.out = nsets)
+
+
+
+#Generating the first set of random numbers
+
+random_v1 = cbind.data.frame(min_temp_coeff, min_temp_coeff2, precip_coeff, precip_coeff2, intercept, min_temp, precip)
+
+# Generating a second set of random variables
+nsets = 500
+min_temp_coeff = rnorm(mean = -0.015, sd = 0.2, n = nsets)
+min_temp_coeff2 = rnorm(mean = -0.0046, sd = 0.2, n = nsets)
+precip_coeff = rnorm(mean = -0.07, sd = 0.2, n = nsets)
+precip_coeff2 = rnorm(mean = 0.0043, sd = 0.2, n = nsets)
+intercept = rnorm(mean = 0.28, sd = 0.2, n = nsets)
+min_temp = rep_len(clim$min_temp, length.out = nsets)
+precip = rep_len(clim$precip, length.out = nsets)
+
+
+random_v2 = cbind.data.frame(min_temp_coeff, min_temp_coeff2, precip_coeff, precip_coeff2, intercept, min_temp, precip)
+
+sens_results_sobol1 = sobol2007(model = NULL, random_v1, random_v2, nboot = 500)
+
+# Running the model for all parameter sets
+
+
+#########################################################################
+
+#This section of the code is currently giving me trouble.
+
+# The sobel1_res is not generating any results
+
+
+sobol1_res = mapply(FUN = Almond_Yield,
+                    min_temp_coeff=sens_results_sobol1$x$min_temp_coeff,
+                    min_temp_coeff2=sens_results_sobol1$x$min_temp_coeff2,
+                    precip_coeff=sens_results_sobol1$x$precip_coeff,
+                    precip_coeff2=sens_results_sobol1$x$precip_coeff2,
+                    intercept=sens_results_sobol1$x$intercept,
+                    min_temp=sens_results_sobol1$x$min_temp,
+                    precip=sens_results_sobol1$x$precip
+                    )
+
+# The sens_almond_sobol2 is giving the error: in d[, 1]: subscript out of bounds
+
+sens_almond_sobol1 = sensitivity::tell(sens_results_sobol1, sobol1_res, res.names="maxyield", "minyield")
+
+# first-order indices (main effect without co-variance)
+sens_almond_sobol1$s
+
+# total sensitivity index - note that this partitions the output variance - so values sum to 1
+sens_almond_sobol1$T
+
+print(sens_almond_sobol1)
+plot(sens_almond_sobol1)
+
 ```
 
 ```{r}
@@ -124,5 +191,76 @@ ggplot(tmp, aes(yield, value, col=yield))+geom_boxplot()+labs(y="Yield (as anomo
 # Sensitivity Analysis using twice as many parameters
 
 
+```
+
+```{r}
+# Using Sobel with twice as many parameter
+
+
+source("Almond_Yield.R")
+# names of parameters
+# number of paramets
+
+nsets = 1000
+min_temp_coeff = rnorm(mean = -0.015, sd = 0.2, n = nsets)
+min_temp_coeff2 = rnorm(mean = -0.0046, sd = 0.2, n = nsets)
+precip_coeff = rnorm(mean = -0.07, sd = 0.2, n = nsets)
+precip_coeff2 = rnorm(mean = 0.0043, sd = 0.2, n = nsets)
+intercept = rnorm(mean = 0.28, sd = 0.2, n = nsets)
+min_temp = rep_len(clim$min_temp, length.out = nsets)
+precip = rep_len(clim$precip, length.out = nsets)
+
+
+
+#Generating the first set of random numbers
+
+random_v1 = cbind.data.frame(min_temp_coeff, min_temp_coeff2, precip_coeff, precip_coeff2, intercept, min_temp, precip)
+
+# Generating a second set of random variables
+nsets = 1000
+min_temp_coeff = rnorm(mean = -0.015, sd = 0.2, n = nsets)
+min_temp_coeff2 = rnorm(mean = -0.0046, sd = 0.2, n = nsets)
+precip_coeff = rnorm(mean = -0.07, sd = 0.2, n = nsets)
+precip_coeff2 = rnorm(mean = 0.0043, sd = 0.2, n = nsets)
+intercept = rnorm(mean = 0.28, sd = 0.2, n = nsets)
+min_temp = rep_len(clim$min_temp, length.out = nsets)
+precip = rep_len(clim$precip, length.out = nsets)
+
+
+random_v2 = cbind.data.frame(min_temp_coeff, min_temp_coeff2, precip_coeff, precip_coeff2, intercept, min_temp, precip)
+
+sens_results_sobol2 = sobol2007(model = NULL, random_v1, random_v2, nboot = 500)
+
+# Running the model for all parameter sets
+
+
+#########################################################################
+
+#This section of the code is currently giving me trouble.
+
+# The sobel1_res is not generating any results
+
+
+sobol2_res = mapply(FUN = Almond_Yield,
+                    min_temp_coeff=sens_results_sobol1$x$min_temp_coeff,
+                    min_temp_coeff2=sens_results_sobol1$x$min_temp_coeff2,
+                    precip_coeff=sens_results_sobol1$x$precip_coeff,
+                    precip_coeff2=sens_results_sobol1$x$precip_coeff2,
+                    intercept=sens_results_sobol1$x$intercept,
+                    min_temp=sens_results_sobol1$x$min_temp,
+                    precip=sens_results_sobol1$x$precip
+                    )
+
+# The sens_almond_sobol2 is giving the error: in d[, 1]: subscript out of bounds
+sens_almond_sobol2 = sensitivity::tell(sens_results_sobol2, sobol2_res, res.names="maxyield", "minyield")
+
+# first-order indices (main effect without co-variance)
+sens_almond_sobol2$s
+
+# total sensitivity index - note that this partitions the output variance - so values sum to 1
+sens_almond_sobol2$T
+
+print(sens_almond_sobol2)
+plot(sens_almond_sobol2)
 ```
 
