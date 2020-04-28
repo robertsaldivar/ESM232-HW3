@@ -145,27 +145,27 @@ precip = rep_len(clim$precip, length.out = nsets)
 
 random_v2 = cbind.data.frame(min_temp_coeff, min_temp_coeff2, precip_coeff, precip_coeff2, intercept, min_temp, precip)
 
-sens_results_sobol1 = sobol2007(model = NULL, random_v1, random_v2, nboot = 500)
+sens_results_sobol1 = sobol2007(model = NULL, random_v1, random_v2, nboot = 100)
 
 # Running the model for all parameter sets
 
 
-#########################################################################
 
-#This section of the code is currently giving me trouble.
-
-# The sobel1_res is not generating any results
 
 
 sobol1_res = mapply(FUN = Almond_Yield,
-                    min_temp_coeff=sens_results_sobol1$x$min_temp_coeff,
-                    min_temp_coeff2=sens_results_sobol1$x$min_temp_coeff2,
-                    precip_coeff=sens_results_sobol1$x$precip_coeff,
-                    precip_coeff2=sens_results_sobol1$x$precip_coeff2,
-                    intercept=sens_results_sobol1$x$intercept,
-                    min_temp=sens_results_sobol1$x$min_temp,
-                    precip=sens_results_sobol1$x$precip
+                    min_temp_coeff=sens_results_sobol1$X$min_temp_coeff,
+                    min_temp_coeff2=sens_results_sobol1$X$min_temp_coeff2,
+                    precip_coeff=sens_results_sobol1$X$precip_coeff,
+                    precip_coeff2=sens_results_sobol1$X$precip_coeff2,
+                    intercept=sens_results_sobol1$X$intercept,
+                    min_temp=sens_results_sobol1$X$min_temp,
+                    precip=sens_results_sobol1$X$precip
                     )
+
+#########################################################################
+
+#This section of the code is currently giving me trouble.
 
 # The sens_almond_sobol2 is giving the error: in d[, 1]: subscript out of bounds
 
@@ -214,7 +214,7 @@ precip = rep_len(clim$precip, length.out = nsets)
 
 #Generating the first set of random numbers
 
-random_v1 = cbind.data.frame(min_temp_coeff, min_temp_coeff2, precip_coeff, precip_coeff2, intercept, min_temp, precip)
+x1 = cbind.data.frame(min_temp_coeff, min_temp_coeff2, precip_coeff, precip_coeff2, intercept, min_temp, precip)
 
 # Generating a second set of random variables
 nsets = 1000
@@ -227,31 +227,29 @@ min_temp = rep_len(clim$min_temp, length.out = nsets)
 precip = rep_len(clim$precip, length.out = nsets)
 
 
-random_v2 = cbind.data.frame(min_temp_coeff, min_temp_coeff2, precip_coeff, precip_coeff2, intercept, min_temp, precip)
+x2 = cbind.data.frame(min_temp_coeff, min_temp_coeff2, precip_coeff, precip_coeff2, intercept, min_temp, precip)
 
-sens_results_sobol2 = sobol2007(model = NULL, random_v1, random_v2, nboot = 500)
+sens_results_sobol2 = sobol2007(model = NULL, x1, x2, nboot = 500)
 
 # Running the model for all parameter sets
 
+
+sobol2_res = mapply(FUN = Almond_Yield,
+                    min_temp_coeff=sens_results_sobol1$X$min_temp_coeff,
+                    min_temp_coeff2=sens_results_sobol1$X$min_temp_coeff2,
+                    precip_coeff=sens_results_sobol1$X$precip_coeff,
+                    precip_coeff2=sens_results_sobol1$X$precip_coeff2,
+                    intercept=sens_results_sobol1$X$intercept,
+                    min_temp=sens_results_sobol1$X$min_temp,
+                    precip=sens_results_sobol1$X$precip
+                    )
 
 #########################################################################
 
 #This section of the code is currently giving me trouble.
 
-# The sobel1_res is not generating any results
+# The sens_almond_sobol2 is giving the error: in d[, 1]: is.atomic(x) is not TRUE
 
-
-sobol2_res = mapply(FUN = Almond_Yield,
-                    min_temp_coeff=sens_results_sobol1$x$min_temp_coeff,
-                    min_temp_coeff2=sens_results_sobol1$x$min_temp_coeff2,
-                    precip_coeff=sens_results_sobol1$x$precip_coeff,
-                    precip_coeff2=sens_results_sobol1$x$precip_coeff2,
-                    intercept=sens_results_sobol1$x$intercept,
-                    min_temp=sens_results_sobol1$x$min_temp,
-                    precip=sens_results_sobol1$x$precip
-                    )
-
-# The sens_almond_sobol2 is giving the error: in d[, 1]: subscript out of bounds
 sens_almond_sobol2 = sensitivity::tell(sens_results_sobol2, sobol2_res, res.names="maxyield", "minyield")
 
 # first-order indices (main effect without co-variance)
