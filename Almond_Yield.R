@@ -23,7 +23,7 @@
 #'	The function itself correctly gets the data from the right month depending on the crop
 #'	The user is required to sort the data in advance so that it is fed the correct monthly data for the desired crop
 
-Almond_Yield <- function(min_temp, precip, min_temp_coeff = -0.015, min_temp_coeff2 = -0.0046, precip_coeff = -0.07, precip_coeff2 = 0.0043, intercept = 0.28, mean_only = FALSE) {
+Almond_Yield <- function(min_temp, precip, min_temp_coeff = -0.015, min_temp_coeff2 = -0.0046, precip_coeff = -0.07, precip_coeff2 = 0.0043, intercept = 0.28, mean_only = TRUE) {
   
   #Adding error checking to the function
   #make sure the temperature is within a possible range
@@ -43,7 +43,7 @@ Almond_Yield <- function(min_temp, precip, min_temp_coeff = -0.015, min_temp_coe
   
   mean_yield = mean(yield)
   
-  #mean_yield = ifelse((mean_only = TRUE), return(mean(yield)))
+  mean_yield = ifelse((mean_only = TRUE), return(mean(yield)))
   
   results = list(yield = yield, maxyield = highest_yield, minyield = lowest_yield, meanyield = mean_yield)
   
