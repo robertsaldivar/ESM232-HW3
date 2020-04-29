@@ -26,13 +26,6 @@ library(gridExtra)
 source("Almond_Yield.R")
 
 
-# Lets consider all parameters....
-factors = c("min_temp_coeff", "min_temp_coeff2", "precip_coeff", "precip_coeff2", "intercept")
-
-# Decide How many parameter sets to run
-nsets=500
-
-
 #Setting up standard deviation of 20%
 sd1 = 0.015*0.2
 sd2 = 0.0046*0.2
@@ -40,9 +33,16 @@ sd3 = 0.07*0.2
 sd4 = 0.0043*0.2
 sd5 = 0.28*0.2
 
-# choose distributions for parameters - 
-q = c("qnorm", "qnorm", "qnorm", "qnorm", "qnorm")
-q.arg = list(list(mean=-0.015,sd=sd1), list(mean=-0.0046, sd=sd2), list(mean=-0.07, sd=sd3), list(mean=0.0043, sd=sd4), list(mean=0.28, sd=sd5))
+
+# read in the input data
+clim=read_csv("climate_input.csv")%>%
+  rename(min_temp = min_T.y)%>%
+  rename(precip = precip.x)%>%
+  mutate(min_temp_coeff=rnorm(mean=-0.015, sd=sd1, n=1))%>%
+  mutate(min_temp_coeff2=rnorm(mean=-0.0046, sd=sd2, n=1))%>%
+  mutate(precip_coeff=rnorm(mean=-0.07, sd=sd3, n=1))%>%
+  mutate(precip_coeff2=rnorm(mean=-0.004, sd=sd4, n=1))%>%
+  mutate(intercept=rnorm(mean=0.28, sd=sd5, n=1))
 
 
 ```
@@ -58,6 +58,19 @@ q.arg = list(list(mean=-0.015,sd=sd1), list(mean=-0.0046, sd=sd2), list(mean=-0.
 # Sensitivity Analysis using LHS
 # generate samples from LHS
 
+
+# Lets consider all parameters....
+factors = c("min_temp_coeff", "min_temp_coeff2", "precip_coeff", "precip_coeff2", "intercept")
+
+# Decide How many parameter sets to run
+nsets=500
+
+
+# choose distributions for parameters - 
+q = c("qnorm", "qnorm", "qnorm", "qnorm", "qnorm")
+q.arg = list(list(mean=-0.015,sd=sd1), list(mean=-0.0046, sd=sd2), list(mean=-0.07, sd=sd3), list(mean=0.0043, sd=sd4), list(mean=0.28, sd=sd5))
+
+
 sens_almond = LHS(NULL,factors,nsets,q,q.arg)
 sens_pars = get.data(sens_almond)
 head(sens_pars)
@@ -68,20 +81,40 @@ head(sens_pars)
 ```{r}
 # Rank and Graph of LHS
 
-# now run the model for each pai of samples
-# first create a data structure to store results
-sens_results = matrix(nrow=nsets, ncol=5)
 
-# read in the input data
-clim=read_csv("climate_input.csv")%>%
-  rename(min_temp = min_T.y)%>%
-  rename(precip = precip.x)
+# create a data structure to store results
+sens_results = matrix(nrow=nsets, ncol=1)
 
 
 #apply our function to the sensativity parameters 
-tmp= mapply(FUN=Almond_Yield,min_temp_coeff=sens_pars$min_temp_coeff, min_temp_coeff2=sens_pars$min_temp_coeff2,precip_coeff=sens_pars$precip_coeff, precip_coeff2=sens_pars$precip_coeff2, intercept=sens_pars$intercept, min_temp = clim$min_temp, precip=clim$precip)
+tmp= mapply(FUN=Almond_Yield,min_temp_coeff=sens_pars$min_temp_coeff, min_temp_coeff2=sens_pars$min_temp_coeff2,precip_coeff=sens_pars$precip_coeff, precip_coeff2=sens_pars$precip_coeff2, intercept=sens_pars$intercept, min_temp = clim$min_temp, precip=clim$precip, mean_only=TRUE)
 head(tmp)
+```
 
+
+```{r}
+# ger results into a graphable format
+sens_results = matrix((unlist(tmp)), ncol=1, byrow=TRUE)
+
+
+colnames(sens_results) = c("mean_yield")
+
+LHS_sens_results = as.data.frame(sens_results)
+
+# look at the senativity of each parameter
+sens_yield_LHS= pse::tell(sens_almond, t(LHS_sens_results))
+sens_yield_LHS
+
+
+LHS_plot<- ggplot(data = LHS_sens_results, aes(y = mean_yield))+
+  geom_boxplot()+
+  labs(y = "Mean Yearly Yield", title = "Sensitivity of Yearly Yields on Model Parameters")+
+  theme_classic()
+LHS_plot
+```
+
+
+```{r}
 # use unlist to get a matrix
 sens_results = matrix((unlist(tmp)), ncol=2, byrow=TRUE)
 
