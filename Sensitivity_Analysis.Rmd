@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #Loading packages for sensitivity analysis
 library(tidyverse)
 library(sensitivity)
@@ -19,7 +19,7 @@ library(gridExtra)
 
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 # Sensitivity Analysis
 # All parameters varied
 
@@ -67,7 +67,7 @@ sens_pars = get.data(sens_almond)
 ```
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE, ouput=FALSE}
 # Rank and Graph of LHS
 source("yield_anom.R")
 
@@ -101,7 +101,7 @@ colnames(sens_results) = c("mean_yield")
 sens_almond = pse::tell(sens_almond, t(sens_results), res.names=c("mean_yield"))
 pse::plotscatter(sens_almond, col="blue", cex=5) 
 pse::plotprcc(sens_almond) 
-sens1$prcc
+sens_almond$prcc
 
 
 ```
@@ -114,7 +114,7 @@ sens_yield_LHS= pse::tell(sens_almond, t(LHS_results))
 sens_yield_LHS
 
 
-LHS_plot= ggplot(data = LHS_sens_results, aes(y = mean_yield))+
+LHS_plot= ggplot(data = LHS_results, aes(y = mean_yield))+
   geom_boxplot()+
   labs(y = "Mean Yearly Yield", title = "Sensitivity of Yearly Yields on Model Parameters")+
   theme_classic()
@@ -123,7 +123,7 @@ LHS_plot
 
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 # Sensitivity Analysis Using Sobel Method
 
 source("Almond_Yield.R")
@@ -202,10 +202,6 @@ ggplot(both1, aes(y = yield)) +
 
 ```
 
-```{r}
-# Rank and Graph of Sobel Method
-```
-
 
 ```{r}
 # LHS Sensitivity Analysis using twice as many parameters
@@ -224,7 +220,7 @@ sens_pars2 = get.data(sens_almond2)
 ```
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE, ouput=FALSE}
 # Rank and Graph of LHS
 source("yield_anom.R")
 
@@ -253,7 +249,7 @@ colnames(sens_results2) = c("mean_yield")
 sens_almond2 = pse::tell(sens_almond2, t(sens_results2), res.names=c("mean_yield"))
 pse::plotscatter(sens_almond2, col="blue", cex=5) 
 pse::plotprcc(sens_almond2) 
-sens1$prcc
+sens_almond2$prcc
 ```
 
 
