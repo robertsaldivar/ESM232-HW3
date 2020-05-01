@@ -209,12 +209,14 @@ plot(sens_almond_sobol1)
 both1 = cbind.data.frame(sens_almond_sobol1$X, yield=sens_almond_sobol1$y)
 
 # Looking at the response to the two most important variables
-ggplot(both1, aes(precip_coeff2, yield)) +
+ggplot(both1, aes(precip_coeff2, yield, col = precip_coeff)) +
   geom_point() +
-  labs(x = "Precipitation Coefficient 2", y = "Yield Anamoly")
+  labs(x = "Precipitation Coefficient 2", y = "Yield Anamoly") +
+  theme_classic()
 
-ggplot(both1, aes(,y = yield )) +
-  geom_boxplot()
+ggplot(both1, aes(y = yield)) +
+  geom_boxplot() +
+  theme_classic()
 
 
 
@@ -300,11 +302,15 @@ plot(sens_almond_sobol2)
 both2 = cbind.data.frame(sens_almond_sobol2$X, yield=sens_almond_sobol2$y)
 
 # Looking at the response to the two most important variables
-ggplot(both2, aes(precip_coeff2, yield)) +
+ggplot(both2, aes(precip_coeff2, yield, col = precip_coeff)) +
   geom_point() +
-  labs(x = "Precipitation Coefficient 2", y = "Yield Anamoly")
+  labs(x = "Precipitation Coefficient 2", y = "Yield Anamoly") +
+  theme_classic()
 
-
+ggplot(both2, aes(y = yield)) +
+  geom_boxplot() +
+  theme_classic() +
+  scale_y_continuous()
 
 ```
 
