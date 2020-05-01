@@ -37,21 +37,11 @@ sd5 = 0.28*0.2
 # read in the input data
 clim=read_csv("climate_input.csv")%>%
   rename(min_temp = min_T.y)%>%
-  rename(precip = precip.x)%>%
-  mutate(min_temp_coeff=rnorm(mean=-0.015, sd=sd1, n=1))%>%
-  mutate(min_temp_coeff2=rnorm(mean=-0.0046, sd=sd2, n=1))%>%
-  mutate(precip_coeff=rnorm(mean=-0.07, sd=sd3, n=1))%>%
-  mutate(precip_coeff2=rnorm(mean=-0.004, sd=sd4, n=1))%>%
-  mutate(intercept=rnorm(mean=0.28, sd=sd5, n=1))
+  rename(precip = precip.x)
 
 
 ```
 
-```{r}
-# Rank and Graph of Sensitivity Analysis
-
-
-```
 
 
 ```{r}
@@ -73,7 +63,6 @@ q.arg = list(list(mean=-0.015,sd=sd1), list(mean=-0.0046, sd=sd2), list(mean=-0.
 
 sens_almond = LHS(NULL,factors,nsets,q,q.arg)
 sens_pars = get.data(sens_almond)
-head(sens_pars)
 
 ```
 
@@ -87,18 +76,36 @@ sens_results = matrix(nrow=nsets, ncol=1)
 
 
 #apply our function to the sensativity parameters 
-tmp= mapply(FUN=Almond_Yield,min_temp_coeff=sens_pars$min_temp_coeff, min_temp_coeff2=sens_pars$min_temp_coeff2,precip_coeff=sens_pars$precip_coeff, precip_coeff2=sens_pars$precip_coeff2, intercept=sens_pars$intercept, min_temp = clim$min_temp, precip=clim$precip, mean_only=TRUE)
-head(tmp)
+sens_1_run= mapply(FUN=yield_anomaly,
+            min_temp_coeff=sens_pars$min_temp_coeff,
+            min_temp_coeff2=sens_pars$min_temp_coeff2,
+            precip_coeff=sens_pars$precip_coeff, 
+            precip_coeff2=sens_pars$precip_coeff2, 
+            intercept=sens_pars$intercept, 
+            climate=clim)
+head(sens_1_run)
 ```
 
 
 ```{r}
 # ger results into a graphable format
-sens_results = matrix((unlist(tmp)), ncol=1, byrow=TRUE)
+sens_results = matrix((unlist(sens_1_run)), ncol=1, byrow=TRUE)
 
 
 colnames(sens_results) = c("mean_yield")
 
+
+
+# to take advantage of LHS/pse functions for plotting interesting information we can send results back
+sens_almond = pse::tell(sens_almond, t(sens_results), res.names=c("mean_yield"))
+pse::plotscatter(sens_almond, col="blue", cex=5) #p2!
+pse::plotprcc(sens_almond) #p2! most sensitive, p1 is next, then tn2, tn1 and then int
+sens1$prcc
+
+
+```
+
+```{r}
 LHS_sens_results = as.data.frame(sens_results)
 
 # look at the senativity of each parameter
