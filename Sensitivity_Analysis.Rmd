@@ -69,6 +69,7 @@ sens_pars = get.data(sens_almond)
 
 ```{r}
 # Rank and Graph of LHS
+source("yield_anom.R")
 
 
 # create a data structure to store results
@@ -82,8 +83,8 @@ sens_1_run= mapply(FUN=yield_anomaly,
             precip_coeff=sens_pars$precip_coeff, 
             precip_coeff2=sens_pars$precip_coeff2, 
             intercept=sens_pars$intercept, 
-            climate=clim)
-head(sens_1_run)
+            MoreArgs=list(climate=clim))
+#head(sens_1_run)
 ```
 
 
@@ -98,56 +99,28 @@ colnames(sens_results) = c("mean_yield")
 
 # to take advantage of LHS/pse functions for plotting interesting information we can send results back
 sens_almond = pse::tell(sens_almond, t(sens_results), res.names=c("mean_yield"))
-pse::plotscatter(sens_almond, col="blue", cex=5) #p2!
-pse::plotprcc(sens_almond) #p2! most sensitive, p1 is next, then tn2, tn1 and then int
+pse::plotscatter(sens_almond, col="blue", cex=5) 
+pse::plotprcc(sens_almond) 
 sens1$prcc
 
 
 ```
 
 ```{r}
-LHS_sens_results = as.data.frame(sens_results)
+LHS_results = as.data.frame(sens_results)
 
 # look at the senativity of each parameter
-sens_yield_LHS= pse::tell(sens_almond, t(LHS_sens_results))
+sens_yield_LHS= pse::tell(sens_almond, t(LHS_results))
 sens_yield_LHS
 
 
-LHS_plot<- ggplot(data = LHS_sens_results, aes(y = mean_yield))+
+LHS_plot= ggplot(data = LHS_sens_results, aes(y = mean_yield))+
   geom_boxplot()+
   labs(y = "Mean Yearly Yield", title = "Sensitivity of Yearly Yields on Model Parameters")+
   theme_classic()
 LHS_plot
 ```
 
-
-```{r}
-# use unlist to get a matrix
-sens_results = matrix((unlist(tmp)), ncol=2, byrow=TRUE)
-
-colnames(sens_results)=c("maxyield","minyield")
-
-# to take advantage of LHS/pse functions for plotting interesting information we can send results back
-sens_almond = pse::tell(sens_almond, t(sens_results), res.names=c("maxyield","minyield"))
-pse::plotscatter(sens_almond, col="blue", cex=5)
-
-pse::plotprcc(sens_almond)
-sens_almond$prcc
-
-# we can also plot results in interesting ways
-# turn sens_results into a data frame - easier access to R plotting functions
-
-sens_results = as.data.frame(sens_results)
-ggplot(sens_results, aes(minyield, maxyield))+geom_point()+labs(y="Max Yield (as anomoly)", "Min Yield (as anomoly")
-
-
-# add uncertainty bounds on our estimates
-tmp = sens_results %>% gather(value="value", key="yield")
-ggplot(tmp, aes(yield, value, col=yield))+geom_boxplot()+labs(y="Yield (as anomoly)")
-
-# notice the difference
-ggplot(tmp, aes(yield, value, col=yield))+geom_boxplot()+labs(y="Yield (as anomoly)")+facet_wrap(~yield, scales="free")
-```
 
 
 ```{r}
@@ -235,10 +208,54 @@ ggplot(both1, aes(y = yield)) +
 
 
 ```{r}
-# Sensitivity Analysis using twice as many parameters
+# LHS Sensitivity Analysis using twice as many parameters
 
+nsets2=1000
+
+
+# choose distributions for parameters - 
+q = c("qnorm", "qnorm", "qnorm", "qnorm", "qnorm")
+q.arg = list(list(mean=-0.015,sd=sd1), list(mean=-0.0046, sd=sd2), list(mean=-0.07, sd=sd3), list(mean=0.0043, sd=sd4), list(mean=0.28, sd=sd5))
+
+
+sens_almond2 = LHS(NULL,factors,nsets2,q,q.arg)
+sens_pars2 = get.data(sens_almond2)
 
 ```
+
+
+```{r}
+# Rank and Graph of LHS
+source("yield_anom.R")
+
+
+# create a data structure to store results
+sens_results2 = matrix(nrow=nsets2, ncol=1)
+
+
+#apply our function to the sensativity parameters 
+sens_2_run= mapply(FUN=yield_anomaly,
+            min_temp_coeff=sens_pars2$min_temp_coeff,
+            min_temp_coeff2=sens_pars2$min_temp_coeff2,
+            precip_coeff=sens_pars2$precip_coeff, 
+            precip_coeff2=sens_pars2$precip_coeff2, 
+            intercept=sens_pars2$intercept, 
+            MoreArgs=list(climate=clim))
+#head(sens_1_run)
+
+sens_results2 = matrix((unlist(sens_2_run)), ncol=1, byrow=TRUE)
+
+
+colnames(sens_results2) = c("mean_yield")
+
+
+# to take advantage of LHS/pse functions for plotting interesting information we can send results back
+sens_almond2 = pse::tell(sens_almond2, t(sens_results2), res.names=c("mean_yield"))
+pse::plotscatter(sens_almond2, col="blue", cex=5) 
+pse::plotprcc(sens_almond2) 
+sens1$prcc
+```
+
 
 ```{r}
 # Using Sobel with twice as many parameter
